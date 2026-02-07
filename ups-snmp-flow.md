@@ -1,4 +1,7 @@
 flowchart TD
+
+    ´´´mermaid
+    
     A[Inicio] --> B[Contenedor Docker activo]
 
     B --> C[Ejecutar monitor_ups.sh cada 30s]
