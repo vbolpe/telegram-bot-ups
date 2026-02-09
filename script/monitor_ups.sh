@@ -1,10 +1,20 @@
-#!/bin/bash
+#!/bin/sh
 
 STATE_FILE="/tmp/ups_state"
-SNMP_OPTS="-v3 -l authPriv -u readuser -a SHA -A $AUTH_PASS -x AES -X $PRIV_PASS"
+LOG_FILE="/tmp/ups.log"
+OID_BATTERY_STATUS="1.3.6.1.2.1.33.1.2.1.0"
+SNMP_OPTS="-v3 -l authPriv -u $SNMP_USER -a MD5 -A $AUTH_PASS -x DES -X $PRIV_PASS -r 2 -t 2"
 
-# Get the current UPS status using snmpget
-STATUS=$(snmpget $SNMP_OPTS "$UPS_IP" upsBasicBatteryStatus.0 -Ovq 2>/dev/null)
+STATUS=$(snmpget $SNMP_OPTS "$UPS_IP" "$OID_BATTERY_STATUS" -Ovq 2>/dev/null)
+
+[-z "$STATUS" ] && exit 0
+
+snmpget -Ovq -v3 -l authPriv \
+-u $SNMP_USER \
+-a MD5 -A "$AUTH_PASS" \
+-x DES -X "$PRIV_PASS" \
+$UPS_IP 1.3.6.1.2.1.33.1.2.1.0
+
 
 [ -z "$STATUS" ] && exit 0
 

@@ -1,13 +1,12 @@
-version: "3.8"
 
 services:
-  ups-smnp:
+  ups-snmp:
     build: .
     container_name: ups-snmp-monitor
     restart: unless-stopped
     environment:
-      -UPS_IP=10.150.0.8
-      -SNMP_USER=readuser
-      -AUTH_PASS=
-      -PRIV_PASS=
+      - UPS_IP=10.150.0.8
+      - SNMP_USER=readuser
+      - AUTH_PASS=
+      - PRIV_PASS=
       - TZ=America/Argentina/Buenos_Aires
