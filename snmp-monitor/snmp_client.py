@@ -99,7 +99,21 @@ class SNMPClient:
         """
         results = {}
         for name, oid in oids_dict.items():
+            if oid is None:  # Skip si el OID no está configurado
+                continue
+                
             value = self.get_value(oid)
+            
+            # Aplicar factor de escala si existe
+            if value is not None and name in SNMPConfig.SCALE_FACTORS:
+                try:
+                    numeric_value = float(value)
+                    scaled_value = numeric_value * SNMPConfig.SCALE_FACTORS[name]
+                    # Redondear a 1 decimal para voltajes/frecuencias
+                    value = str(round(scaled_value, 1))
+                except (ValueError, TypeError):
+                    pass  # Mantener el valor original si no se puede convertir
+            
             results[name] = value
             logger.debug(f"{name}: {value}")
         

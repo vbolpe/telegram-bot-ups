@@ -31,9 +31,33 @@ class SNMPConfig:
         'battery_capacity': os.getenv('OID_UPS_BATTERY_CAPACITY', '1.3.6.1.4.1.318.1.1.1.2.2.1.0'),
         'battery_runtime': os.getenv('OID_UPS_BATTERY_RUNTIME', '1.3.6.1.4.1.318.1.1.1.2.2.3.0'),
         'input_voltage': os.getenv('OID_UPS_INPUT_VOLTAGE', '1.3.6.1.4.1.318.1.1.1.3.2.1.0'),
+        'input_frequency': os.getenv('OID_UPS_INPUT_FREQUENCY'),
         'output_voltage': os.getenv('OID_UPS_OUTPUT_VOLTAGE', '1.3.6.1.4.1.318.1.1.1.4.2.1.0'),
+        'output_frequency': os.getenv('OID_UPS_OUTPUT_FREQUENCY'),
         'output_load': os.getenv('OID_UPS_OUTPUT_LOAD', '1.3.6.1.4.1.318.1.1.1.4.2.3.0'),
+        'output_current': os.getenv('OID_UPS_OUTPUT_CURRENT'),
+        'output_power': os.getenv('OID_UPS_OUTPUT_POWER'),
         'temperature': os.getenv('OID_UPS_TEMPERATURE', '1.3.6.1.4.1.318.1.1.1.2.2.2.0'),
+        'bypass_voltage': os.getenv('OID_UPS_BYPASS_VOLTAGE'),
+        'alarms': os.getenv('OID_UPS_ALARMS'),
+    }
+    
+    # OIDs opcionales para información del sistema
+    INFO_OIDS = {
+        'model': os.getenv('OID_UPS_MODEL'),
+        'firmware': os.getenv('OID_UPS_FIRMWARE'),
+        'serial': os.getenv('OID_UPS_SERIAL'),
+    }
+    
+    # Factores de escala para valores de Eaton (algunos vienen en 0.1 unidad)
+    # Por ejemplo: voltaje puede venir como 2200 que significa 220.0V
+    SCALE_FACTORS = {
+        'input_voltage': 0.1,  # Eaton devuelve en 0.1V
+        'output_voltage': 0.1,  # Eaton devuelve en 0.1V
+        'input_frequency': 0.1,  # Eaton devuelve en 0.1Hz
+        'output_frequency': 0.1,  # Eaton devuelve en 0.1Hz
+        'output_current': 0.1,  # Eaton devuelve en 0.1A
+        'bypass_voltage': 0.1,  # Eaton devuelve en 0.1V
     }
 
 class MonitorConfig:

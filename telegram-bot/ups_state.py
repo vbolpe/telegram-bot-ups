@@ -56,20 +56,57 @@ class UPSState:
         except:
             last_update_str = last_update
         
+        # Construir mensaje base
         message = f"""🔋 *Estado de la UPS*
 
 📊 *Estado General:* {status_text}
 🔋 *Batería:* {battery_status_text}
-⚡ *Carga:* {data.get('battery_capacity', 'N/A')}%
+⚡ *Carga Batería:* {data.get('battery_capacity', 'N/A')}%
 ⏱️ *Autonomía:* {self._format_runtime(data.get('battery_runtime'))}
 
-📥 *Voltaje Entrada:* {data.get('input_voltage', 'N/A')} V
-📤 *Voltaje Salida:* {data.get('output_voltage', 'N/A')} V
-📊 *Carga de Salida:* {data.get('output_load', 'N/A')}%
-🌡️ *Temperatura:* {data.get('temperature', 'N/A')}°C
+📥 *Entrada:*
+   • Voltaje: {data.get('input_voltage', 'N/A')} V"""
+        
+        # Agregar frecuencia de entrada si está disponible
+        if data.get('input_frequency'):
+            message += f"\n   • Frecuencia: {data.get('input_frequency')} Hz"
+        
+        message += f"""
 
-🕐 *Última actualización:* {last_update_str}
-"""
+📤 *Salida:*
+   • Voltaje: {data.get('output_voltage', 'N/A')} V"""
+        
+        # Agregar frecuencia de salida si está disponible
+        if data.get('output_frequency'):
+            message += f"\n   • Frecuencia: {data.get('output_frequency')} Hz"
+            
+        message += f"\n   • Carga: {data.get('output_load', 'N/A')}%"
+        
+        # Agregar corriente si está disponible
+        if data.get('output_current'):
+            message += f"\n   • Corriente: {data.get('output_current')} A"
+        
+        # Agregar potencia si está disponible
+        if data.get('output_power'):
+            try:
+                power_kw = float(data.get('output_power', 0)) / 1000
+                message += f"\n   • Potencia: {power_kw:.1f} kW"
+            except:
+                message += f"\n   • Potencia: {data.get('output_power')} W"
+        
+        # Agregar bypass si está disponible
+        if data.get('bypass_voltage'):
+            message += f"\n\n🔄 *Bypass:* {data.get('bypass_voltage')} V"
+        
+        # Agregar temperatura
+        message += f"\n\n🌡️ *Temperatura:* {data.get('temperature', 'N/A')}°C"
+        
+        # Agregar alarmas si existen
+        if data.get('alarms') and data.get('alarms') != '0':
+            message += f"\n⚠️ *Alarmas Activas:* {data.get('alarms')}"
+        
+        message += f"\n\n🕐 *Última actualización:* {last_update_str}"
+        
         return message
     
     def _format_runtime(self, runtime):
