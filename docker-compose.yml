@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  telegram-bot:
+    build:
+      context: ./telegram-bot
+      dockerfile: Dockerfile
+    container_name: ups-telegram-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - TZ=America/Argentina/Buenos_Aires
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    networks:
+      - ups-network
+    depends_on:
+      - snmp-monitor
+
+  snmp-monitor:
+    build:
+      context: ./snmp-monitor
+      dockerfile: Dockerfile
+    container_name: ups-snmp-monitor
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - TZ=America/Argentina/Buenos_Aires
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    networks:
+      - ups-network
+
+networks:
+  ups-network:
+    driver: bridge
+
+volumes:
+  data:
+  logs:
