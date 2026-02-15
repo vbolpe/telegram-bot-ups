@@ -30,11 +30,12 @@ def main():
 
     app.add_handler(CommandHandler("status", status_command))
 
-    start_scheduler()
 
     async def post_init():
+
+        start_scheduler()
         asyncio.create_task(event_loop())
-        
+
     app.post_init = post_init
     app.run_polling()
 
