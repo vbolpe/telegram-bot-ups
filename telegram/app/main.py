@@ -14,7 +14,7 @@ from .scheduler import start_scheduler
 async def status_command(update, context):
     data = get_status()
     await update.message.reply_text(format_status(data))
-    
+
 async def event_loop():
     while True:
         event = get_event()
@@ -31,9 +31,9 @@ async def main():
     app.add_handler(CommandHandler("status", status_command))
 
     start_scheduler()
-    asyncio.create_task(event_loop())
 
-    await app.run_polling()
+    app.post_init = lambda: asyncio.create_task(event_loop(app))
+    app.run_polling()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
