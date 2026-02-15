@@ -1,12 +1,26 @@
 
 services:
-  ups-snmp:
-    build: .
-    container_name: ups-snmp-monitor
-    restart: unless-stopped
-    environment:
-      - UPS_IP=10.150.0.8
-      - SNMP_USER=readuser
-      - AUTH_PASS=
-      - PRIV_PASS=
-      - TZ=America/Argentina/Buenos_Aires
+  snmp-service:
+    build: ./snmp-service
+    container_name: snmp-service
+    restart: always
+    env_file:
+      - ./snmp-service/.env
+    networks:
+      - ups-net
+
+  
+  telegram-bot:
+    build: ./telegram-bot
+    container_name: telegram-ups
+    restart: always
+    env_file:
+      - ./telegram/.env
+    depends_on:
+      - snmp-service
+    networks:
+      - ups-net
+
+networks:
+  ups-net:
+    driver: bridge

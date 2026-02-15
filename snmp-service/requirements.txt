@@ -1,0 +1,4 @@
+pysnmp
+fastapi
+uvicorn
+python-dotenv
