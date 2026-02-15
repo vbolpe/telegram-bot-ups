@@ -177,7 +177,7 @@ Para soporte o configuración, consulta la documentación del proyecto.
         )
         logger.info("Verificador de cola de mensajes iniciado")
     
-    async def start_bot(self):
+    def start_bot(self):
         """Inicia el bot"""
         logger.info("Iniciando bot de Telegram...")
         
@@ -195,7 +195,7 @@ Para soporte o configuración, consulta la documentación del proyecto.
         # Enviar mensaje de inicio
         try:
             self.bot = Bot(token=self.token)
-            await self.send_message(
+            self.send_message(
                 '✅ *Bot de monitoreo UPS iniciado*\n\n'
                 'El sistema está funcionando correctamente.\n'
                 'Usa /help para ver los comandos disponibles.'
@@ -204,13 +204,13 @@ Para soporte o configuración, consulta la documentación del proyecto.
             logger.error(f"Error al enviar mensaje de inicio: {str(e)}")
         
         # Iniciar bot en modo polling
-        await self.application.run_polling(allowed_updates=Update.ALL_TYPES)
+        self.application.run_polling(allowed_updates=Update.ALL_TYPES)
 
-async def main():
+def main():
     """Función principal"""
     try:
         bot = UPSTelegramBot()
-        await bot.start_bot()
+        bot.start_bot()
     except KeyboardInterrupt:
         logger.info("Bot detenido por el usuario")
     except Exception as e:
@@ -218,4 +218,4 @@ async def main():
         raise
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
