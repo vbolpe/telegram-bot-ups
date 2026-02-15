@@ -11,6 +11,10 @@ from .scheduler import start_scheduler
 
 # ==== Funciones ====
 
+async def status_command(update, context):
+    data = get_status()
+    await update.message.reply_text(format_status(data))
+    
 async def event_loop():
     while True:
         event = get_event()
