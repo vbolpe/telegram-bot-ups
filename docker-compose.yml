@@ -11,7 +11,7 @@ services:
 
   
   telegram-bot:
-    build: ./telegram-bot
+    build: ./telegram
     container_name: telegram-ups
     restart: always
     env_file:

@@ -25,14 +25,17 @@ async def event_loop():
 
         await asyncio.sleep(10)
 
-async def main():
+def main():
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
 
     app.add_handler(CommandHandler("status", status_command))
 
     start_scheduler()
 
-    app.post_init = lambda: asyncio.create_task(event_loop(app))
+    async def post_init():
+        asyncio.create_task(event_loop())
+        
+    app.post_init = post_init
     app.run_polling()
 
 if __name__ == "__main__":
