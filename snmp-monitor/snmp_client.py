@@ -2,6 +2,7 @@
 Cliente SNMP v3 para consultar la UPS
 """
 from pysnmp.hlapi import *
+from pysnmp.proto import rfc1902
 from config import SNMPConfig
 import logging
 
@@ -33,7 +34,11 @@ class SNMPClient:
             'SHA384': usmHMAC256SHA384AuthProtocol,
             'SHA512': usmHMAC384SHA512AuthProtocol,
         }
-        return protocols.get(SNMPConfig.AUTH_PROTOCOL.upper(), usmHMACSHAAuthProtocol)
+        protocol_name = SNMPConfig.AUTH_PROTOCOL.upper()
+        if protocol_name not in protocols:
+            logger.warning(f"Protocolo de autenticación '{protocol_name}' no reconocido, usando SHA por defecto")
+            return usmHMACSHAAuthProtocol
+        return protocols[protocol_name]
     
     def _get_priv_protocol(self):
         """Obtiene el protocolo de privacidad"""
@@ -43,8 +48,13 @@ class SNMPClient:
             'AES128': usmAesCfb128Protocol,
             'AES192': usmAesCfb192Protocol,
             'AES256': usmAesCfb256Protocol,
+            '3DES': usm3DESEDEPrivProtocol,
         }
-        return protocols.get(SNMPConfig.PRIV_PROTOCOL.upper(), usmAesCfb128Protocol)
+        protocol_name = SNMPConfig.PRIV_PROTOCOL.upper()
+        if protocol_name not in protocols:
+            logger.warning(f"Protocolo de privacidad '{protocol_name}' no reconocido, usando AES por defecto")
+            return usmAesCfb128Protocol
+        return protocols[protocol_name]
     
     def get_value(self, oid):
         """

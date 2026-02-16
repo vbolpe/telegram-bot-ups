@@ -166,43 +166,39 @@ Para soporte o configuración, consulta la documentación del proyecto.
         """Tarea periódica para verificar la cola de mensajes"""
         await self.process_message_queue()
     
-    async def post_init(self, application: Application):
-        """Configuración post-inicialización"""
-        # Programar verificación periódica de la cola
-        job_queue = application.job_queue
-        job_queue.run_repeating(
-            self.queue_checker,
-            interval=BotConfig.QUEUE_CHECK_INTERVAL,
-            first=1
-        )
-        logger.info("Verificador de cola de mensajes iniciado")
-    
-    def start_bot(self):
+def start_bot(self):
         """Inicia el bot"""
         logger.info("Iniciando bot de Telegram...")
         
         # Crear aplicación
-        self.application = Application.builder().token(self.token).post_init(self.post_init).build()
+        self.application = Application.builder().token(self.token).build()
         
         # Agregar manejadores de comandos
         self.application.add_handler(CommandHandler("start", self.start_command))
         self.application.add_handler(CommandHandler("status", self.status_command))
         self.application.add_handler(CommandHandler("help", self.help_command))
         
+        # Programar verificación periódica de la cola
+        if self.application.job_queue:
+            self.application.job_queue.run_repeating(
+                self.queue_checker,
+                interval=BotConfig.QUEUE_CHECK_INTERVAL,
+                first=5
+            )
+            logger.info("Verificador de cola de mensajes programado")
+        else:
+            logger.warning("JobQueue no disponible - mensajes se procesarán manualmente")
+        
         logger.info("Bot configurado correctamente")
         logger.info(f"Chat ID: {self.chat_id}")
+        logger.info("Iniciando polling...")
         
-        # Enviar mensaje de inicio
-        try:
-            self.bot = Bot(token=self.token)
-            self.send_message(
-                '✅ *Bot de monitoreo UPS iniciado*\n\n'
-                'El sistema está funcionando correctamente.\n'
-                'Usa /help para ver los comandos disponibles.'
-            )
-        except Exception as e:
-            logger.error(f"Error al enviar mensaje de inicio: {str(e)}")
-        
+        # Iniciar bot en modo polling
+        self.application.run_polling(
+            allowed_updates=Update.ALL_TYPES,
+            drop_pending_updates=True
+        )
+               
         # Iniciar bot en modo polling
         self.application.run_polling(allowed_updates=Update.ALL_TYPES)
 

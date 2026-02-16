@@ -14,11 +14,11 @@ class SNMPConfig:
     USER = os.getenv('SNMP_USER', 'snmpuser')
     
     # Protocolos de autenticación
-    AUTH_PROTOCOL = os.getenv('SNMP_AUTH_PROTOCOL', 'SHA')
+    AUTH_PROTOCOL = os.getenv('SNMP_AUTH_PROTOCOL', 'MD5')
     AUTH_PASSWORD = os.getenv('SNMP_AUTH_PASSWORD', '')
     
     # Protocolos de privacidad
-    PRIV_PROTOCOL = os.getenv('SNMP_PRIV_PROTOCOL', 'AES')
+    PRIV_PROTOCOL = os.getenv('SNMP_PRIV_PROTOCOL', 'DES')
     PRIV_PASSWORD = os.getenv('SNMP_PRIV_PASSWORD', '')
     
     # Nivel de seguridad
