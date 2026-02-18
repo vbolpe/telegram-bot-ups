@@ -1,8 +1,26 @@
 """
 Cliente SNMP v3 para consultar la UPS
 """
-from pysnmp.hlapi import *
-from pysnmp.proto import rfc1902
+from pysnmp.hlapi import (
+    SnmpEngine,
+    UsmUserData,
+    UdpTransportTarget,
+    ContextData,
+    ObjectType,
+    ObjectIdentity,
+    getCmd,
+    usmHMACMD5AuthProtocol,
+    usmHMACSHAAuthProtocol,
+    usmHMAC128SHA224AuthProtocol,
+    usmHMAC192SHA256AuthProtocol,
+    usmHMAC256SHA384AuthProtocol,
+    usmHMAC384SHA512AuthProtocol,
+    usmDESPrivProtocol,
+    usmAesCfb128Protocol,
+    usmAesCfb192Protocol,
+    usmAesCfb256Protocol,
+    usm3DESEDEPrivProtocol,
+)
 from config import SNMPConfig
 import logging
 

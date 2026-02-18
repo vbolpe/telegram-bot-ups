@@ -26,20 +26,20 @@ class SNMPConfig:
     
     # OIDs de la UPS
     OIDS = {
-        'status': os.getenv('OID_UPS_STATUS', '1.3.6.1.4.1.318.1.1.1.4.1.1.0'),
+        'status': os.getenv('OID_UPS_STATUS', '1.3.6.1.4.1.534.1.4.1.0'),
         'battery_status': os.getenv('OID_UPS_BATTERY_STATUS', '1.3.6.1.4.1.318.1.1.1.2.1.1.0'),
         'battery_capacity': os.getenv('OID_UPS_BATTERY_CAPACITY', '1.3.6.1.4.1.318.1.1.1.2.2.1.0'),
         'battery_runtime': os.getenv('OID_UPS_BATTERY_RUNTIME', '1.3.6.1.4.1.318.1.1.1.2.2.3.0'),
-        'input_voltage': os.getenv('OID_UPS_INPUT_VOLTAGE', '1.3.6.1.4.1.318.1.1.1.3.2.1.0'),
-        'input_frequency': os.getenv('OID_UPS_INPUT_FREQUENCY'),
-        'output_voltage': os.getenv('OID_UPS_OUTPUT_VOLTAGE', '1.3.6.1.4.1.318.1.1.1.4.2.1.0'),
-        'output_frequency': os.getenv('OID_UPS_OUTPUT_FREQUENCY'),
-        'output_load': os.getenv('OID_UPS_OUTPUT_LOAD', '1.3.6.1.4.1.318.1.1.1.4.2.3.0'),
+        'input_voltage': os.getenv('OID_UPS_INPUT_VOLTAGE', '1.3.6.1.4.1.534.1.3.4.1.2.1'),
+        'input_frequency': os.getenv('OID_UPS_INPUT_FREQUENCY', '1.3.6.1.4.1.534.1.3.1.0'),
+        'output_voltage': os.getenv('OID_UPS_OUTPUT_VOLTAGE', '1.3.6.1.4.1.534.1.4.4.1.2.1'),
+        'output_frequency': os.getenv('OID_UPS_OUTPUT_FREQUENCY', '1.3.6.1.4.1.534.1.4.2.0'),
+        'output_load': os.getenv('OID_UPS_OUTPUT_LOAD', '1.3.6.1.4.1.534.1.4.3.0'),
         'output_current': os.getenv('OID_UPS_OUTPUT_CURRENT'),
-        'output_power': os.getenv('OID_UPS_OUTPUT_POWER'),
+        'output_power': os.getenv('OID_UPS_OUTPUT_POWER', '1.3.6.1.4.1.534.1.4.4.1.4.1'),
         'temperature': os.getenv('OID_UPS_TEMPERATURE', '1.3.6.1.4.1.318.1.1.1.2.2.2.0'),
         'bypass_voltage': os.getenv('OID_UPS_BYPASS_VOLTAGE'),
-        'alarms': os.getenv('OID_UPS_ALARMS'),
+        'alarms': os.getenv('OID_UPS_ALARMS', '1.3.6.1.4.1.534.1.4.8.0'),
     }
     
     # OIDs opcionales para información del sistema
