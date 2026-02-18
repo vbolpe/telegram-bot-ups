@@ -63,7 +63,6 @@ class SNMPConfig:
     SCALE_FACTORS = {
         'input_frequency': 0.1,   # 500 → 50.0 Hz
         'output_frequency': 0.1,  # 500 → 50.0 Hz
-        'output_current': 0.1,   # 50 → 5.0 A
     }
 
 class MonitorConfig:
