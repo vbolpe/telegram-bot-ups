@@ -15,13 +15,13 @@ class UPSState:
     # Mapeo de estados comunes de UPS (ajustar según fabricante)
     STATUS_MAP = {
         '1': 'Unknown',
-        '2': 'Online (Normal)',
-        '3': 'On Battery',
-        '4': 'On Boost',
-        '5': 'On Sleep',
+        #'2': 'Online (Normal)',
+        '3': 'Online',
+        '4': 'On Bypass',
+        '5': 'On Battery',
         '6': 'Off',
         '7': 'Rebooting',
-        '8': 'On Bypass',
+        #'8': 'On Bypass',
         '9': 'Hardware Failure',
         '10': 'Software Failure',
         '11': 'In Test',
