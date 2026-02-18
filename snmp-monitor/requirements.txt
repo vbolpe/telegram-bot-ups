@@ -1,4 +1,4 @@
-pysnmp==6.2.4
-pyasn1==0.6.1
+pysnmp==4.4.12
+pyasn1==0.4.8
 python-dotenv==1.0.0
 schedule==1.2.0
