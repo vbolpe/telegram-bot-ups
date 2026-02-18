@@ -14,11 +14,11 @@ class SNMPConfig:
     USER = os.getenv('SNMP_USER', 'snmpuser')
     
     # Protocolos de autenticación
-    AUTH_PROTOCOL = os.getenv('SNMP_AUTH_PROTOCOL', 'MD5')
+    AUTH_PROTOCOL = os.getenv('SNMP_AUTH_PROTOCOL', 'SHA')
     AUTH_PASSWORD = os.getenv('SNMP_AUTH_PASSWORD', '')
     
     # Protocolos de privacidad
-    PRIV_PROTOCOL = os.getenv('SNMP_PRIV_PROTOCOL', 'DES')
+    PRIV_PROTOCOL = os.getenv('SNMP_PRIV_PROTOCOL', 'AES')
     PRIV_PASSWORD = os.getenv('SNMP_PRIV_PASSWORD', '')
     
     # Nivel de seguridad
@@ -49,15 +49,11 @@ class SNMPConfig:
         'serial': os.getenv('OID_UPS_SERIAL'),
     }
     
-    # Factores de escala para valores de Eaton (algunos vienen en 0.1 unidad)
-    # Por ejemplo: voltaje puede venir como 2200 que significa 220.0V
+    # Factores de escala para valores de Eaton 93E
+    # Solo la frecuencia necesita escalado (viene en 0.1 Hz)
     SCALE_FACTORS = {
-        'input_voltage': 0.1,  # Eaton devuelve en 0.1V
-        'output_voltage': 0.1,  # Eaton devuelve en 0.1V
-        'input_frequency': 0.1,  # Eaton devuelve en 0.1Hz
-        'output_frequency': 0.1,  # Eaton devuelve en 0.1Hz
-        'output_current': 0.1,  # Eaton devuelve en 0.1A
-        'bypass_voltage': 0.1,  # Eaton devuelve en 0.1V
+        'input_frequency': 0.1,   # 500 → 50.0 Hz
+        'output_frequency': 0.1,  # 500 → 50.0 Hz
     }
 
 class MonitorConfig:
