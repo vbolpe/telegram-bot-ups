@@ -1,7 +1,8 @@
 """
 Cliente SNMP v3 para consultar la UPS
 """
-from pysnmp.hlapi.v3arch.asyncio import *
+from pysnmp.hlapi import *
+from pysnmp.proto import rfc1902
 from config import SNMPConfig
 import logging
 
