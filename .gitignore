@@ -27,6 +27,10 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+venv/
+__pycache__/
+*.pyc
+.env
 
 # Docker
 .docker/
