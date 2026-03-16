@@ -1,43 +1,64 @@
-
 services:
   telegram-bot:
     build:
-      context: ./telegram-bot
+      context: /srv/dockerdata/ups/telegram-bot
       dockerfile: Dockerfile
     container_name: ups-telegram-bot
     restart: unless-stopped
     env_file:
-      - .env
+      - /srv/dockerdata/ups/.env
     environment:
       - TZ=America/Argentina/Buenos_Aires
     volumes:
-      - ./data:/app/data
-      - ./logs:/app/logs
+      - /srv/dockerdata/ups/data:/app/data:Z
+      - /srv/dockerdata/ups/logs:/app/logs:Z
     networks:
-      - ups-network
+      - ups-internal
+      - botnet
     depends_on:
       - snmp-monitor
+    cap_drop:
+      - ALL
+    cap_add:
+      - DAC_OVERRIDE
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   snmp-monitor:
     build:
-      context: ./snmp-monitor
+      context: /srv/dockerdata/ups/snmp-monitor
       dockerfile: Dockerfile
     container_name: ups-snmp-monitor
     restart: unless-stopped
     env_file:
-      - .env
+      - /srv/dockerdata/ups/.env
     environment:
       - TZ=America/Argentina/Buenos_Aires
     volumes:
-      - ./data:/app/data
-      - ./logs:/app/logs
+      - /srv/dockerdata/ups/data:/app/data:Z
+      - /srv/dockerdata/ups/logs:/app/logs:Z
     networks:
-      - ups-network
+      - ups-internal
+    cap_drop:
+      - ALL
+    cap_add:
+      - DAC_OVERRIDE
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 networks:
-  ups-network:
+  ups-internal:
     driver: bridge
-
-volumes:
-  data:
-  logs:
+    name: ups-internal
+  botnet:
+    external: true
