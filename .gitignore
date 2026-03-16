@@ -1,3 +1,14 @@
+ARQUITECTURA.md
+CONFIGURACION.md
+EATON_93E.md
+.env.example
+.env.eaton93e-validated
+Makefile
+OIDS.md
+README.md
+start.sh
+test_snmp.py
+
 # Variables de entorno
 .env
 
