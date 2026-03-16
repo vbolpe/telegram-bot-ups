@@ -10,6 +10,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Crear directorios necesarios
-RUN mkdir -p /app/data /app/logs
+RUN mkdir -p /app/data /app/logs && chmod 777 /app/data /app/logs
 
 CMD ["python", "bot.py"]
