@@ -145,20 +145,28 @@ Para soporte o configuración, consulta la documentación del proyecto.
             if not queue:
                 return
             
+            sent = 0
+            failed = []
             # Procesar cada mensaje
             for message_data in queue:
                 try:
                     await self.send_message(message_data['message'])
+                    sent += 1
                     await asyncio.sleep(1)  # Evitar rate limiting
                 except Exception as e:
                     logger.error(f"Error al enviar mensaje de la cola: {str(e)}")
-            
-            # Limpiar cola
+                    failed.append(message_data)
+
+            # Solo conservar en cola los mensajes que fallaron
             with open(queue_file, 'w') as f:
-                json.dump([], f)
+                json.dump(failed, f, indent=2)
             
-            logger.info(f"Procesados {len(queue)} mensajes de la cola")
+            if sent:
+                logger.info(f"Procesados {sent} mensajes de la cola")
             
+            if failed:
+                logger.warning(f"{len(failed)} mensajes quedaron en cola por error")
+                
         except Exception as e:
             logger.error(f"Error al procesar cola de mensajes: {str(e)}")
     
@@ -193,12 +201,6 @@ Para soporte o configuración, consulta la documentación del proyecto.
             logger.info(f"Chat ID: {self.chat_id}")
             logger.info("Iniciando polling...")
             
-            # Iniciar bot en modo polling
-            self.application.run_polling(
-                allowed_updates=Update.ALL_TYPES,
-                drop_pending_updates=True
-            )
-                
             # Iniciar bot en modo polling
             self.application.run_polling(allowed_updates=Update.ALL_TYPES)
 
