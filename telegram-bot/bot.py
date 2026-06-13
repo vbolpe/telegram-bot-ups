@@ -196,14 +196,25 @@ Para soporte o configuración, consulta la documentación del proyecto.
                 logger.info("Verificador de cola de mensajes programado")
             else:
                 logger.warning("JobQueue no disponible - mensajes se procesarán manualmente")
-            
+
+                # Tarea de asyncio 
+                async def post_init(app):
+                    asyncio.create_task(self._queue_loop())
+                self.application.post_init = post_init
+
             logger.info("Bot configurado correctamente")
             logger.info(f"Chat ID: {self.chat_id}")
             logger.info("Iniciando polling...")
             
-            # Iniciar bot en modo polling
-            self.application.run_polling(allowed_updates=Update.ALL_TYPES)
-
+    async def _queue_loop(self):
+        """Loop de respaldo para procesar la cola de mensajes en caso de que JobQueue no esté disponible"""
+        logger.info("Iniciando loop de respaldo para cola de mensajes")
+        while True:
+            try:
+                await self.process_message_queue()
+            except Exception as e:
+                logger.error(f"Error en el loop de cola: {str(e)}")
+            await asyncio.sleep(BotConfig.QUEUE_CHECK_INTERVAL)
 def main():
     """Función principal"""
     try:
