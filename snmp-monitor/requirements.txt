@@ -1,4 +1,4 @@
-pysnmp==4.4.12
-pyasn1==0.4.8
+pysnmp-lextudio>=6.1.0
+pyasn1>=0.5.0
 python-dotenv==1.0.0
 schedule==1.2.0
