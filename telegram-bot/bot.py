@@ -49,7 +49,6 @@ class UPSTelegramBot:
     async def status_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Maneja el comando /status"""
         try:
-            # Leer el estado actual
             state_file = os.path.join(BotConfig.DATA_DIR, 'ups_state.json')
             
             if not os.path.exists(state_file):
@@ -62,7 +61,6 @@ class UPSTelegramBot:
             with open(state_file, 'r') as f:
                 state = json.load(f)
             
-            # Formatear mensaje
             from ups_state import UPSState
             ups_state = UPSState()
             message = ups_state.format_state_message(state)
@@ -138,7 +136,6 @@ Para soporte o configuración, consulta la documentación del proyecto.
             return
         
         try:
-            # Leer cola
             with open(queue_file, 'r') as f:
                 queue = json.load(f)
             
@@ -147,7 +144,6 @@ Para soporte o configuración, consulta la documentación del proyecto.
             
             sent = 0
             failed = []
-            # Procesar cada mensaje
             for message_data in queue:
                 try:
                     await self.send_message(message_data['message'])
@@ -157,7 +153,6 @@ Para soporte o configuración, consulta la documentación del proyecto.
                     logger.error(f"Error al enviar mensaje de la cola: {str(e)}")
                     failed.append(message_data)
 
-            # Solo conservar en cola los mensajes que fallaron
             with open(queue_file, 'w') as f:
                 json.dump(failed, f, indent=2)
             
@@ -171,50 +166,47 @@ Para soporte o configuración, consulta la documentación del proyecto.
             logger.error(f"Error al procesar cola de mensajes: {str(e)}")
     
     async def queue_checker(self, context: ContextTypes.DEFAULT_TYPE):
-        """Tarea periódica para verificar la cola de mensajes"""
+        """Tarea periódica para verificar la cola de mensajes (JobQueue)"""
         await self.process_message_queue()
-    
-    def start_bot(self):
-            """Inicia el bot"""
-            logger.info("Iniciando bot de Telegram...")
-            
-            # Crear aplicación
-            self.application = Application.builder().token(self.token).build()
-            
-            # Agregar manejadores de comandos
-            self.application.add_handler(CommandHandler("start", self.start_command))
-            self.application.add_handler(CommandHandler("status", self.status_command))
-            self.application.add_handler(CommandHandler("help", self.help_command))
-            
-            # Programar verificación periódica de la cola
-            if self.application.job_queue:
-                self.application.job_queue.run_repeating(
-                    self.queue_checker,
-                    interval=BotConfig.QUEUE_CHECK_INTERVAL,
-                    first=5
-                )
-                logger.info("Verificador de cola de mensajes programado")
-            else:
-                logger.warning("JobQueue no disponible - mensajes se procesarán manualmente")
 
-                # Tarea de asyncio 
-                async def post_init(app):
-                    asyncio.create_task(self._queue_loop())
-                self.application.post_init = post_init
-
-            logger.info("Bot configurado correctamente")
-            logger.info(f"Chat ID: {self.chat_id}")
-            logger.info("Iniciando polling...")
-            
     async def _queue_loop(self):
-        """Loop de respaldo para procesar la cola de mensajes en caso de que JobQueue no esté disponible"""
-        logger.info("Iniciando loop de respaldo para cola de mensajes")
+        """Loop asyncio de respaldo cuando JobQueue no está disponible"""
+        logger.info("Loop de cola asyncio iniciado (fallback)")
         while True:
             try:
                 await self.process_message_queue()
             except Exception as e:
-                logger.error(f"Error en el loop de cola: {str(e)}")
+                logger.error(f"Error en loop de cola asyncio: {str(e)}")
             await asyncio.sleep(BotConfig.QUEUE_CHECK_INTERVAL)
+
+    def start_bot(self):
+        """Inicia el bot"""
+        logger.info("Iniciando bot de Telegram...")
+        
+        self.application = Application.builder().token(self.token).build()
+        
+        self.application.add_handler(CommandHandler("start", self.start_command))
+        self.application.add_handler(CommandHandler("status", self.status_command))
+        self.application.add_handler(CommandHandler("help", self.help_command))
+        
+        if self.application.job_queue:
+            self.application.job_queue.run_repeating(
+                self.queue_checker,
+                interval=BotConfig.QUEUE_CHECK_INTERVAL,
+                first=5
+            )
+            logger.info("Verificador de cola programado via JobQueue")
+        else:
+            logger.warning("JobQueue no disponible - usando loop asyncio como fallback")
+            async def post_init(app):
+                asyncio.create_task(self._queue_loop())
+            self.application.post_init = post_init
+        
+        logger.info(f"Chat ID: {self.chat_id}")
+        logger.info("Iniciando polling...")
+        
+        self.application.run_polling(allowed_updates=Update.ALL_TYPES)
+
 def main():
     """Función principal"""
     try:
