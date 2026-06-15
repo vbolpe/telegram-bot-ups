@@ -6,20 +6,23 @@ from datetime import datetime
 class UPSState:
     """Gestión del estado de la UPS"""
     
-    # Mapeo de estados comunes de UPS
+    # Mapeo validado contra Eaton 93E real
+    # OID: 1.3.6.1.2.1.33.1.4.1.0
+    # Valor confirmado: 3=Online (UPS en red normal), 5=On Battery
     STATUS_MAP = {
-        '1': 'Unknown',
-        '2': 'Online (Normal)',
-        '3': 'On Battery',
-        '4': 'On Boost',
-        '5': 'On Sleep',
-        '6': 'Off',
-        '7': 'Rebooting',
-        '8': 'On Bypass',
-        '9': 'Hardware Failure',
+        '1':  'Unknown',
+        '2':  'Online (Normal)',
+        '3':  'Online',                 # Confirmado: valor normal en Eaton 93E
+        '4':  'On Boost',
+        '5':  'On Battery',             # CRITICO: UPS en bateria
+        '6':  'Off',
+        '7':  'Rebooting',
+        '8':  'On Bypass',
+        '9':  'Hardware Failure',
         '10': 'Software Failure',
         '11': 'In Test',
         '12': 'Emergency Static Bypass',
+        '14': 'Power Saving (ECOnversion)',
     }
     
     BATTERY_STATUS_MAP = {
@@ -110,19 +113,21 @@ class UPSState:
         return message
     
     def _format_runtime(self, runtime):
-        """Formatea el tiempo de autonomía"""
+        """
+        Formatea el tiempo de autonomia.
+        OID Eaton privado 1.3.6.1.4.1.534.1.2.1.0 devuelve SEGUNDOS.
+        Validado: 7747s = 2h 9min (coincide con interfaz web Eaton).
+        """
         if runtime is None or runtime == 'N/A':
             return 'N/A'
-        
+
         try:
-            # El runtime suele venir en minutos
-            minutes = int(runtime)
-            hours = minutes // 60
-            mins = minutes % 60
-            
+            total_seconds = int(str(runtime).split()[0])  # tolera "7680 s" o "7680"
+            hours = total_seconds // 3600
+            mins = (total_seconds % 3600) // 60
             if hours > 0:
                 return f"{hours}h {mins}min"
             else:
                 return f"{mins} min"
-        except:
+        except (ValueError, TypeError):
             return str(runtime)
