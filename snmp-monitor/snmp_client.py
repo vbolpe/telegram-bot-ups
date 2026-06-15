@@ -72,7 +72,7 @@ class SNMPClient:
         return protocols[name]
 
     async def _get_value_async(self, snmp_engine, oid):
-        """Obtiene el valor de un OID de forma asíncrona (reutiliza el engine)"""
+        """Obtiene el valor de un OID de forma asíncrona"""
         try:
             transport = await UdpTransportTarget.create(
                 (self.host, self.port), timeout=5.0, retries=3
@@ -105,10 +105,6 @@ class SNMPClient:
             logger.error(f"Excepción al obtener OID {oid}: {str(e)}")
             return None
 
-    def get_value(self, oid):
-        """Obtiene el valor de un OID (interfaz síncrona para compatibilidad)"""
-        return asyncio.run(self._get_all_async({oid: oid})).get(oid)
-
     async def _get_all_async(self, oids_dict):
         """Consulta todos los OIDs compartiendo un único SnmpEngine"""
         snmp_engine = SnmpEngine()
@@ -119,7 +115,6 @@ class SNMPClient:
                     continue
                 value = await self._get_value_async(snmp_engine, oid)
 
-                # Aplicar factor de escala si corresponde
                 if value is not None and name in SNMPConfig.SCALE_FACTORS:
                     try:
                         scaled = float(value) * SNMPConfig.SCALE_FACTORS[name]
@@ -135,10 +130,7 @@ class SNMPClient:
         return results
 
     def get_all_values(self, oids_dict):
-        """
-        Obtiene todos los valores del diccionario de OIDs.
-        Interfaz síncrona que internamente usa asyncio.
-        """
+        """Interfaz síncrona que internamente usa asyncio"""
         return asyncio.run(self._get_all_async(oids_dict))
 
     def test_connection(self):
