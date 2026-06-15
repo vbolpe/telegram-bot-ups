@@ -12,14 +12,15 @@ logger = logging.getLogger(__name__)
 class UPSState:
     """Gestión del estado de la UPS"""
 
-    # Mapeo correcto según UPS-MIB estándar + valores reales Eaton 93E validados
+    # Mapeo validado contra Eaton 93E real
     # OID: 1.3.6.1.2.1.33.1.4.1.0
+    # Valor confirmado: 3=Online (UPS en red normal)
     STATUS_MAP = {
         '1':  'Unknown',
         '2':  'Online (Normal)',
-        '3':  'On Battery',           # CRÍTICO: UPS en batería
+        '3':  'Online',                # Confirmado: valor normal en Eaton 93E
         '4':  'On Boost',
-        '5':  'On Sleep',
+        '5':  'On Battery',            # CRÍTICO: UPS en batería
         '6':  'Off',
         '7':  'Rebooting',
         '8':  'On Bypass',
@@ -27,7 +28,7 @@ class UPSState:
         '10': 'Software Failure',
         '11': 'In Test',
         '12': 'Emergency Static Bypass',
-        '14': 'Power Saving (ECOnversion)',  # Valor real Eaton 93E
+        '14': 'Power Saving (ECOnversion)',
     }
 
     # OID: 1.3.6.1.2.1.33.1.2.1.0
@@ -40,7 +41,7 @@ class UPSState:
     }
 
     # Estados que requieren alerta inmediata
-    CRITICAL_STATUSES = {'3', '9', '10', '12'}         # On Battery, failures
+    CRITICAL_STATUSES = {'5', '9', '10', '12'}         # On Battery, failures
     CRITICAL_BATTERY_STATUSES = {'3', '4'}              # Low, Depleted
 
     # Umbrales mínimos de cambio para generar alerta (evitar ruido)
@@ -221,7 +222,8 @@ class UPSState:
     def _format_runtime(self, runtime):
         """
         Formatea el tiempo de autonomía.
-        La Eaton 93E devuelve el OID 1.3.6.1.2.1.33.1.2.3.0 en SEGUNDOS.
+        OID Eaton privado 1.3.6.1.4.1.534.1.2.1.0 devuelve SEGUNDOS.
+        Validado: 7747s = 2h 9min (coincide con interfaz web Eaton).
         """
         if runtime is None or runtime == 'N/A':
             return 'N/A'
