@@ -46,14 +46,22 @@ class UPSState:
 
     # Umbrales mínimos de cambio para generar alerta (evitar ruido)
     CHANGE_THRESHOLDS = {
-        'input_voltage':    5.0,   # V  — no alertar por ±1V de ruido
-        'output_voltage':   5.0,   # V
-        'bypass_voltage':   5.0,   # V
-        'battery_capacity': 5.0,   # %  — alertar cada 5%
-        'output_load':      5.0,   # %
-        'output_current':   1.0,   # A
-        'temperature':      3.0,   # °C
+        'input_voltage':    5.0,    # V  — no alertar por ±1V de ruido
+        'output_voltage':   5.0,    # V
+        'bypass_voltage':   5.0,    # V
+        'battery_capacity': 5.0,    # %  — alertar cada 5%
+        'battery_runtime':  300.0,  # s  — alertar cada 5 minutos de cambio
+        'output_load':      5.0,    # %
+        'output_current':   1.0,    # A
+        'output_power':     100.0,  # W
+        'output_frequency': 1.0,    # Hz
+        'input_frequency':  1.0,    # Hz
+        'temperature':      3.0,    # °C
     }
+
+    # Claves que nunca deben generar alertas por cambio numérico
+    # (solo se alertan si cambian como string exacto, ej: códigos de estado)
+    NO_ALERT_KEYS = {'last_update'}
 
     def __init__(self):
         self.state_file = MonitorConfig.STATE_FILE
@@ -79,17 +87,40 @@ class UPSState:
         except Exception as e:
             logger.error(f"Error al guardar estado: {str(e)}")
 
+    @staticmethod
+    def _parse_numeric(value):
+        """
+        Extrae el número de un valor SNMP que puede venir como string con unidades.
+        Ejemplos: '220', '220 V', '50.0 Hz', '19 C' → float
+        Retorna None si no es parseable.
+        """
+        if value is None:
+            return None
+        try:
+            # Tomar solo la primera parte antes de cualquier espacio
+            return float(str(value).split()[0])
+        except (ValueError, IndexError):
+            return None
+
     def _exceeds_threshold(self, key, old_val, new_val):
         """
         Determina si un cambio numérico supera el umbral mínimo para alertar.
-        Para claves sin umbral definido, siempre retorna True (alertar).
+        - Si la clave no tiene umbral definido: alerta siempre (cambios de estado, alarmas).
+        - Si tiene umbral: parsea ambos valores como número y compara.
+          Si no son numéricos, compara como string.
         """
         if key not in self.CHANGE_THRESHOLDS:
             return True
-        try:
-            return abs(float(new_val) - float(old_val)) >= self.CHANGE_THRESHOLDS[key]
-        except (TypeError, ValueError):
-            return old_val != new_val
+
+        old_num = self._parse_numeric(old_val)
+        new_num = self._parse_numeric(new_val)
+
+        if old_num is not None and new_num is not None:
+            return abs(new_num - old_num) >= self.CHANGE_THRESHOLDS[key]
+
+        # Fallback: comparación string (no debería ocurrir en valores numéricos)
+        logger.warning(f"No se pudo parsear numéricamente '{key}': '{old_val}' → '{new_val}', comparando como string")
+        return old_val != new_val
 
     def update_state(self, new_data):
         """
@@ -102,6 +133,9 @@ class UPSState:
         timestamp = datetime.now().isoformat()
 
         for key, new_value in new_data.items():
+            if key in self.NO_ALERT_KEYS:
+                continue
+
             old_value = self.current_state.get(key)
 
             if old_value is None or old_value == new_value:
