@@ -52,8 +52,8 @@ class UPSState:
         'battery_capacity': 5.0,    # %  — alertar cada 5%
         'battery_runtime':  300.0,  # s  — alertar cada 5 minutos de cambio
         'output_load':      5.0,    # %
-        'output_current':   15.0,   # A  — oscilacion normal observada: ±10A
-        'output_power':     200.0,  # W  — oscilacion normal observada: ±100W
+        'output_current':   30.0,   # A  — oscilacion normal observada: ±10A
+        'output_power':     500.0,  # W  — oscilacion normal observada: ±100W
         'output_frequency': 1.0,    # Hz
         'input_frequency':  1.0,    # Hz
         'temperature':      3.0,    # °C
